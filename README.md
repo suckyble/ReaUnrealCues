@@ -4,6 +4,8 @@
 
 It is designed for speed and musicality: cues are automatically trimmed, placed on the grid, and organized neatly in your project folder.
 
+![screenshot](img/live_demo.gif)
+
 ## 🚀 Features
 
 * **High-Quality AI Voices:** Access to ultra-realistic Kokoro voices (Scarlett, Dan, Will, Liv, Amy) + multi-language support.
