@@ -1,8 +1,3 @@
--- REAPER Cue Generator: Unreal Speech (Final V2)
--- 1. Default Tail Trim = 200ms (0.2s).
--- 2. First Item places EXACTLY at Playhead Cursor.
--- 3. Labels on Left, fully resizeable manually.
-
 local script_title = "ReaUnrealCues"
 
 if not reaper.APIExists("ImGui_CreateContext") then
