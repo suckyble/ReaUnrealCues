@@ -6,7 +6,7 @@ if not reaper.APIExists("ImGui_CreateContext") then
 end
 
 local ctx = reaper.ImGui_CreateContext(script_title)
-local WINDOW_FLAGS = reaper.ImGui_WindowFlags_None() -- Manual resizing allowed
+local WINDOW_FLAGS = reaper.ImGui_WindowFlags_None()
 
 -- STATE
 local settings = {
@@ -17,8 +17,8 @@ local settings = {
     pitch = 1.0,
     bitrate = 1,
     trim_silence = true,
-    trim_ms = 0.5,    -- Start Trim (Default 500ms)
-    tail_ms = 0.2,    -- End Trim (UPDATED: 200ms)
+    trim_ms = 0.5,    -- Start Trim (500ms)
+    tail_ms = 0.2,    -- End Trim (200ms)
     spacing = 1
 }
 
@@ -132,9 +132,11 @@ function ProcessQueue()
         os.execute('mkdir -p "' .. cues_path .. '"')
     end
     
-    -- Capture EXACT cursor position
     local start_pos = reaper.GetCursorPosition()
-    local start_beat = reaper.TimeMap2_timeToBeats(0, start_pos)
+    
+    -- BUG FIX: TimeMap2_timeToBeats returns multiple values. 
+    -- The 4th value is the absolute beats since project start.
+    local _, _, _, start_beat_abs = reaper.TimeMap2_timeToBeats(0, start_pos)
     
     local cues = SplitString(settings.text_input, ",")
     local last_item_end_time = start_pos
@@ -146,7 +148,7 @@ function ProcessQueue()
         
         if output_file then
             local retries = 0
-            while not io.open(output_file, "rb") and retries < 40 do
+            while not io.open(output_file, "rb") and retries < 120 do
                 local s = os.clock(); while os.clock()-s < 0.05 do end; retries=retries+1
             end
             
@@ -154,20 +156,25 @@ function ProcessQueue()
             local success = false
             if f then
                 local size = f:seek("end")
-                if size > 1000 then success = true end
+                if size > 1000 then 
+                    success = true 
+                else
+                    f:seek("set")
+                    local content = f:read("*all")
+                    Msg("Skipping '"..cue_text.."': File too small ("..size.." bytes).")
+                end
                 f:close()
+            else
+                Msg("Skipping '"..cue_text.."': Timeout waiting for file.")
             end
             
             if success then
-                -- CALCULATE POSITION
                 local target_time = 0
                 if i == 1 then
-                    -- First item: EXACTLY at cursor
                     target_time = start_pos
                 else
-                    -- Subsequent items: Spaced by Beat/Bar relative to start beat
                     local beat_step = (settings.spacing == 0) and 1 or 4
-                    local target_beat = start_beat + ((i - 1) * beat_step)
+                    local target_beat = start_beat_abs + ((i - 1) * beat_step)
                     target_time = reaper.TimeMap2_beatsToTime(0, target_beat)
                 end
                 
@@ -178,15 +185,10 @@ function ProcessQueue()
                 reaper.SetMediaItemTake_Source(take, src)
                 local src_len, _ = reaper.GetMediaSourceLength(src)
                 
-                -- TRIM LOGIC (Start + Tail)
                 if settings.trim_silence then
-                    -- 1. Trim Start
                     reaper.SetMediaItemTakeInfo_Value(take, "D_STARTOFFS", settings.trim_ms)
-                    
-                    -- 2. New Length = Total - Start - Tail
                     local new_len = src_len - settings.trim_ms - settings.tail_ms
                     if new_len < 0.1 then new_len = 0.1 end
-                    
                     reaper.SetMediaItemInfo_Value(item, "D_LENGTH", new_len)
                 else
                     reaper.SetMediaItemInfo_Value(item, "D_LENGTH", src_len)
@@ -206,15 +208,12 @@ function ProcessQueue()
         end
     end
     
-    -- Auto-Advance Cursor
     reaper.SetEditCurPos(last_item_end_time, true, false)
-    
     reaper.UpdateArrange()
     reaper.Undo_EndBlock("Generate Cues", -1)
 end
 
 function loop()
-    -- First Run Size
     reaper.ImGui_SetNextWindowSize(ctx, 450, 600, reaper.ImGui_Cond_FirstUseEver())
 
     local visible, open = reaper.ImGui_Begin(ctx, script_title, true, WINDOW_FLAGS)
@@ -237,7 +236,7 @@ function loop()
             
             reaper.ImGui_Separator(ctx)
             
-            -- LAYOUT HELPER
+            -- UI HELPER
             local function LabelAndControl(label, control_func)
                 reaper.ImGui_AlignTextToFramePadding(ctx)
                 reaper.ImGui_Text(ctx, label)
@@ -309,7 +308,7 @@ function loop()
             
             if process_state == 0 then
                 if reaper.ImGui_Button(ctx, "GENERATE CUES", -1, btn_h) then
-                    process_state = 1
+                    process_state = 1 -- Start update cycle
                     frame_delay_counter = 0
                 end
             else
