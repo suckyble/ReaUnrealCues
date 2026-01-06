@@ -78,7 +78,7 @@ end
 
 function GenerateCue(text, index, output_folder)
     local voice_id = voice_ids[settings.voice_idx + 1]
-    local url = "https://api.v7.unrealspeech.com/stream"
+    local url = "https://api.v8.unrealspeech.com/stream"
     
     local temp_dir = os.getenv("TEMP") or os.getenv("TMP") or "C:\\Temp"
     local json_filename = "reacue_" .. tostring(os.time()) .. "_" .. index .. ".json"
