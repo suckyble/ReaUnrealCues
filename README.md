@@ -21,6 +21,7 @@ Before using this script, you need to install **ReaImGui** (for the interface).
 3.  Search for `ReaImGui` (copy&paste the name!).
 4.  Right-click and **Install**.
 5.  Click **Apply** to finish.
+6.  Restart Reaper
 
 ## 🛠️ Installation
 
