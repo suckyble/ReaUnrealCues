@@ -17,7 +17,7 @@ It is designed for speed and musicality: cues are automatically trimmed, placed 
 Before using this script, you need to install **ReaImGui** (for the interface).
 
 1.  Open REAPER.
-2.  Go to **Extensions > ReaPack > Browse Packages**.
+2.  Go to **Extensions > ReaPack > Browse Packages**. (Install from [reapack.com](https://reapack.com/) if you don't have it installed yet)
 3.  Search for `ReaImGui` (copy&paste the name!).
 4.  Right-click and **Install**.
 5.  Click **Apply** to finish.
