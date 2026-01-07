@@ -9,8 +9,12 @@ It is designed for speed and musicality: cues are automatically trimmed, placed 
 ## 🚀 Features
 
 * **High-Quality AI Voices:** Access to ultra-realistic Kokoro voices (Scarlett, Dan, Will, Liv, Amy) + multi-language support.
+* * **Dual Engine Architecture:**
+    * **V8 (Modern):** Access 48+ ultra-realistic multilingual voices (English, Spanish, Chinese, Japanese, etc.) powered by the new Kokoro engine.
+    * **V7 (Legacy):** Still love the classic voices? Switch instantly to the V7 engine to use the original "Scarlett", "Dan", and "Liv" models.
 * **Smart Auto-Trim:** Automatically removes leading silence (latency) and trailing silence so cues feel "tight" and punchy immediately.
-* **Project Organization:** Automatically saves generated audio files into a `/cues/` subfolder inside your current project media directory.
+* * **Project Organization:** Automatically saves generated audio files into a `/cues/` subfolder inside your current project media directory.
+* **Built-in Cue Library:** A sidebar automatically scans your project's `/cues/` folder. Drag and drop previously generated lines instantly without regenerating them.
 
 ## 📦 Prerequisites
 
