@@ -1,9 +1,3 @@
--- REAPER Cue Generator: Unreal Speech (Final Sweetspot)
--- 1. WINDOW: Defaults to 850x550.
--- 2. UI: "Generating" button turns Yellow (Visual Feedback restored).
--- 3. LAYOUT: Dashboard style (Generator Left, Library Right).
--- 4. FEATURES: V7/V8, Smart Filenames, Auto-Trim, Auto-Advance.
-
 local script_title = "ReaUnrealCuesv2"
 
 if not reaper.APIExists("ImGui_CreateContext") then
@@ -181,6 +175,11 @@ end
 
 -- --- GENERATION ---
 
+-- HELPER: Get OS-Specific Separator
+function GetPathSeparator()
+    if GetOS() == "Windows" then return "\\" else return "/" end
+end
+
 function GenerateCue(text, index, output_folder)
     local current_ids = (settings.api_version == 8) and voices_v8_ids or voices_v7_ids
     local current_display = (settings.api_version == 8) and voices_v8_display or voices_v7_display
@@ -190,12 +189,16 @@ function GenerateCue(text, index, output_folder)
     
     local url = "https://api.v" .. settings.api_version .. ".unrealspeech.com/stream"
     
-    local temp_dir = os.getenv("TEMP") or os.getenv("TMP") or "C:\\Temp"
+    -- FIX: Cross-platform Temp Directory
+    local sep = GetPathSeparator()
+    local temp_dir = os.getenv("TEMP") or os.getenv("TMP") or (GetOS() == "Windows" and "C:\\Temp" or "/tmp")
     local json_filename = "reacue_" .. tostring(os.time()) .. "_" .. index .. ".json"
-    local json_path = temp_dir .. "\\" .. json_filename
+    
+    -- FIX: Use correct separator for the OS
+    local json_path = temp_dir .. sep .. json_filename
     
     local f = io.open(json_path, "w")
-    if not f then Msg("Error: Could not create temp JSON."); return nil end
+    if not f then Msg("Error: Could not create temp JSON at: " .. json_path); return nil end
     
     local safe_text = text:gsub('"', '\\"') 
     local json_content = string.format(
@@ -219,19 +222,22 @@ function GenerateCue(text, index, output_folder)
     local safe_name = string.format("%s_%s_%s_%s", fn_text, fn_voice, fn_params, unique_id)
     local outfile = output_folder .. safe_name .. ".mp3"
     
-    local win_json = json_path:gsub("/", "\\")
-    local win_out = outfile:gsub("/", "\\")
-    local curl_exe = GetCurlPath()
-    
     local cmd = ""
     if GetOS() == "Windows" then
+        -- Windows: Use ExecProcess with explicit curl path + double quotes
+        local win_json = json_path:gsub("/", "\\")
+        local win_out = outfile:gsub("/", "\\")
+        local curl_exe = GetCurlPath()
+        
         cmd = string.format('"%s" -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d "@%s" -o "%s"', 
             curl_exe, url, settings.api_key, win_json, win_out)
     else
+        -- Mac/Linux: Standard curl is usually in PATH, works with simple string
         cmd = string.format('curl -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d "@%s" -o "%s"', 
             url, settings.api_key, json_path, outfile)
     end
     
+    -- Execute
     local result = reaper.ExecProcess(cmd, 15000)
     os.remove(json_path)
     
