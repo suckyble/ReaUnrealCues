@@ -103,7 +103,7 @@ end
 -- --- LIBRARY FUNCTIONS ---
 
 function GetCuesFolderPath()
-    local proj_path = reaper.GetProjectPath()
+    local proj_path = reaper.GetProjectPath("")
     if not proj_path or proj_path == "" then return nil end
     local sep = (GetOS() == "Windows") and "\\" or "/"
     return proj_path .. sep .. "cues" .. sep
