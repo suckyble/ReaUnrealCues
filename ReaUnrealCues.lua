@@ -233,7 +233,7 @@ function GenerateCue(text, index, output_folder)
             curl_exe, url, settings.api_key, win_json, win_out)
     else
         -- FIX 3: Hardcoded /usr/bin/curl for macOS and protected @"%s"
-        cmd = string.format('/usr/bin/curl -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d @"%s" -o "%s"', 
+        cmd = string.format('/usr/bin/curl -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d "@%s" -o "%s"', 
             url, settings.api_key, json_path, outfile)
     end
     
