@@ -189,12 +189,12 @@ function GenerateCue(text, index, output_folder)
     
     local url = "https://api.v" .. settings.api_version .. ".unrealspeech.com/stream"
     
-    -- FIX: Cross-platform Temp Directory
+    -- FIX 1: Cross-platform Temp Directory (macOS TMPDIR support)
     local sep = GetPathSeparator()
-    local temp_dir = os.getenv("TEMP") or os.getenv("TMP") or (GetOS() == "Windows" and "C:\\Temp" or "/tmp")
-    local json_filename = "reacue_" .. tostring(os.time()) .. "_" .. index .. ".json"
+    local temp_dir = os.getenv("TEMP") or os.getenv("TMP") or os.getenv("TMPDIR") or (GetOS() == "Windows" and "C:\\Temp" or "/tmp")
+    temp_dir = temp_dir:gsub(sep .. "$", "") -- Remove trailing slash if present
     
-    -- FIX: Use correct separator for the OS
+    local json_filename = "reacue_" .. tostring(os.time()) .. "_" .. index .. ".json"
     local json_path = temp_dir .. sep .. json_filename
     
     local f = io.open(json_path, "w")
@@ -224,21 +224,45 @@ function GenerateCue(text, index, output_folder)
     
     local cmd = ""
     if GetOS() == "Windows" then
-        -- Windows: Use ExecProcess with explicit curl path + double quotes
         local win_json = json_path:gsub("/", "\\")
         local win_out = outfile:gsub("/", "\\")
         local curl_exe = GetCurlPath()
         
-        cmd = string.format('"%s" -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d "@%s" -o "%s"', 
+        -- FIX 2: Added @"%s" instead of "@%s" to protect paths with spaces
+        cmd = string.format('"%s" -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d @"%s" -o "%s"', 
             curl_exe, url, settings.api_key, win_json, win_out)
     else
-        -- Mac/Linux: Standard curl is usually in PATH, works with simple string
-        cmd = string.format('curl -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d "@%s" -o "%s"', 
+        -- FIX 3: Hardcoded /usr/bin/curl for macOS and protected @"%s"
+        cmd = string.format('/usr/bin/curl -s -X POST "%s" -H "Authorization: Bearer %s" -H "Content-Type: application/json; charset=utf-8" -d @"%s" -o "%s"', 
             url, settings.api_key, json_path, outfile)
     end
     
     -- Execute
     local result = reaper.ExecProcess(cmd, 15000)
+    
+    -- FIX 4: RETRY LOGIC & ERROR LOGGING
+    local function IsValid(path)
+        local fh = io.open(path, "rb")
+        if not fh then return false end
+        local sz = fh:seek("end"); fh:close()
+        return sz > 1024
+    end
+
+    if not IsValid(outfile) then
+        local t0 = os.clock()
+        while os.clock() - t0 < 0.5 do end 
+        result = reaper.ExecProcess(cmd, 15000)
+    end
+    
+    if not IsValid(outfile) then
+        Msg("\n--- API/CURL ERROR LOG ---")
+        Msg("Command Failed:")
+        Msg(cmd)
+        Msg("\nSystem Response:")
+        Msg(tostring(result))
+        Msg("--------------------------\n")
+    end
+    
     os.remove(json_path)
     
     return outfile
