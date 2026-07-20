@@ -44,25 +44,33 @@ local voices_v7_ids = {
 }
 
 local voices_v8_display = {
-    "Autumn (US)", "Melody (US)", "Hannah (US)", "Emily (US)", "Ivy (US)", "Kaitlyn (US)", "Luna (US)", "Willow (US)", "Lauren (US)", "Sierra (US)",
-    "Noah (US)", "Jasper (US)", "Caleb (US)", "Ronan (US)", "Ethan (US)", "Daniel (US)", "Zane (US)",
+    "Autumn (US Fem)", "Melody (US Fem)", "Hannah (US Fem)", "Emily (US Fem)", "Ivy (US Fem)", "Kaitlyn (US Fem)", "Luna (US Fem)", "Willow (US Fem)", "Lauren (US Fem)", "Sierra (US Fem)",
+    "Noah (US Male)", "Jasper (US Male)", "Caleb (US Male)", "Ronan (US Male)", "Ethan (US Male)", "Daniel (US Male)", "Zane (US Male)",
+    "Eleanor (UK Fem)", "Chloe (UK Fem)", "Amelia (UK Fem)", "Charlotte (UK Fem)",
+    "Benjamin (UK Male)", "Arthur (UK Male)", "Edward (UK Male)", "Oliver (UK Male)",
     "Mei (CN Fem)", "Lian (CN Fem)", "Ting (CN Fem)", "Jing (CN Fem)",
     "Wei (CN Male)", "Jian (CN Male)", "Hao (CN Male)", "Sheng (CN Male)",
     "Lucía (ES Fem)", "Mateo (ES Male)", "Javier (ES Male)",
     "Élodie (FR Fem)",
     "Ananya (HI Fem)", "Priya (HI Fem)", "Arjun (HI Male)", "Rohan (HI Male)",
     "Giulia (IT Fem)", "Luca (IT Male)",
+    "Sakura (JP Fem)", "Hana (JP Fem)", "Yuki (JP Fem)", "Rina (JP Fem)",
+    "Haruto (JP Male)",
     "Camila (PT Fem)", "Thiago (PT Male)", "Rafael (PT Male)"
 }
 
 local voices_v8_ids = {
     "Autumn", "Melody", "Hannah", "Emily", "Ivy", "Kaitlyn", "Luna", "Willow", "Lauren", "Sierra",
     "Noah", "Jasper", "Caleb", "Ronan", "Ethan", "Daniel", "Zane",
+    "Eleanor", "Chloe", "Amelia", "Charlotte",
+    "Benjamin", "Arthur", "Edward", "Oliver",
     "Mei", "Lian", "Ting", "Jing", "Wei", "Jian", "Hao", "Sheng",
     "Lucía", "Mateo", "Javier",
     "Élodie",
     "Ananya", "Priya", "Arjun", "Rohan",
     "Giulia", "Luca",
+    "Sakura", "Hana", "Yuki", "Rina",
+    "Haruto",
     "Camila", "Thiago", "Rafael"
 }
 
